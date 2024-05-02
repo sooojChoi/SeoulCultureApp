@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SeoulClutureApp</string>
+    <string name="retry">retry for the event information</string>
+    <string name="loading_failed">loading is failed</string>
+</resources>
