@@ -39,6 +39,7 @@ import com.example.seoulclutureapp.ui.theme.gray80
 @Composable
 fun HomeScreen(
     eventUiState: EventUiState,
+    todaysEvent:List<Event> = listOf(),
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -46,7 +47,7 @@ fun HomeScreen(
     when (eventUiState) {
         is EventUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
         is EventUiState.Success ->
-            EventsScreen(eventUiState.events, contentPadding, modifier.fillMaxSize())
+            EventsScreen(todaysEvent, contentPadding, modifier.fillMaxSize())
         is EventUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
     }
 }
@@ -81,6 +82,7 @@ fun EventCard(event: Event, modifier:Modifier = Modifier){
         ) {
             Text(event.title, fontSize = 18.sp, fontStyle = FontStyle.Italic)
             Text(event.place, fontSize=15.sp)
+            Text(event.date)
 
         }
 
@@ -90,11 +92,6 @@ fun EventCard(event: Event, modifier:Modifier = Modifier){
 
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
-//    Image(
-//        modifier = modifier.size(200.dp),
-//        painter = painterResource(R.drawable.loading_img),
-//        contentDescription = stringResource(R.string.loading)
-//    )
     Box(modifier=modifier,
         contentAlignment = Alignment.Center
         ) {
@@ -135,6 +132,7 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 fun ScreenPreview(){
     SeoulClutureAppTheme{
         HomeScreen(retryAction = {},
-            eventUiState = EventUiState.Loading)
+            eventUiState = EventUiState.Loading,
+            todaysEvent = listOf())
     }
 }

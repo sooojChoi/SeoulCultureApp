@@ -16,15 +16,15 @@ data class Event (
     @SerialName(value="PLACE")
     val place :String,
     @SerialName(value="ORG_NAME")
-    val orgName:String,
+    val orgName:String? = null,
     @SerialName(value="USE_TRGT")
-    val useTarget:String,
+    val useTarget:String? = null,
     @SerialName(value="USE_FEE")
-    val useFee:String,
+    val useFee:String? = null,
     @SerialName(value="ORG_LINK")
-    val link:String,
+    val link:String? = null,
     @SerialName(value="MAIN_IMG")
-    val imgSrc:String,
+    val imgSrc:String? = null,
     @SerialName(value="RGSTDATE")
     val registerDate:String,
     @SerialName(value="STRTDATE")
@@ -32,17 +32,17 @@ data class Event (
     @SerialName(value="END_DATE")
     val endDate:String,
     @SerialName(value="LOT")
-    val longitude:String,
+    val longitude:String? = null,
     @SerialName(value="LAT")
-    val latitude:String,
+    val latitude:String? = null,
     @SerialName(value="IS_FREE")
-    val isFree:String
+    val isFree:String? = ""
 )
 
 @Serializable
 data class EventResult(
     @SerialName(value="list_total_count")
-    val totalCount:Int? = null,
+    val totalCount:Int? = 0,
     @SerialName(value="RESULT")
     val resultCode:CodeResult? = null,
     @SerialName(value="row")
