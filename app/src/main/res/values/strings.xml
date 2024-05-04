@@ -4,4 +4,7 @@
     <string name="loading_failed">loading is failed</string>
     <string name="event_photo">photo of event\'s information\n</string>
     <string name="homescreen_title">Seoul Culture Event</string>
+    <string name="event_detail_title">Detail of Event</string>
+    <string name="back_button">back button</string>
+    <string name="favorite_button">like button</string>
 </resources>

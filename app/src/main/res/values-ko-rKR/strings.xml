@@ -5,4 +5,7 @@
     <string name="loading_failed">정보를 가져오는데 실패했습니다.</string>
     <string name="event_photo">행사 정보에 대한 이미지</string>
     <string name="homescreen_title">서울 문화행사</string>
+    <string name="event_detail_title">이벤트 세부 정보</string>
+    <string name="back_button">뒤로가기</string>
+    <string name="favorite_button">좋아요 버튼</string>
 </resources>

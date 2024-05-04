@@ -1,8 +1,10 @@
 package com.example.seoulclutureapp
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -40,6 +42,7 @@ import com.example.seoulclutureapp.ui.theme.SeoulClutureAppTheme
 import com.example.seoulclutureapp.ui.theme.gray80
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -56,84 +59,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun PageContainer(modifier: Modifier = Modifier){
-
-    val pagerState = rememberPagerState(0)
-    HorizontalPager(pageCount=5, state = pagerState,
-        modifier = modifier,
-
-           ) { page ->
-        // Our page content
-//        Text(
-//            text = "Page: $page",
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(100.dp)
-//        )
-        CardItem(
-            Modifier
-                .fillMaxWidth()
-                .height(150.dp),
-            page, 5)
-    }
-}
-
-@Composable
-fun CardItem(modifier: Modifier = Modifier, currentPage: Int = 1, totalPage:Int=1){
-
-    Card(modifier = modifier
-        .fillMaxWidth()
-        .padding(10.dp),
-        colors= CardDefaults.cardColors(containerColor = Color(red = 243, green=202, blue=82)),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        ),
-    ) {
-        Column(
-            modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .padding(10.dp)
-                ) {
-            Text("제목입니다. ", fontSize = 18.sp, fontStyle = FontStyle.Italic)
-            Text("내용입니다. 내용이 참 많습니다. ", fontSize=15.sp)
-
-            Row (modifier = Modifier
-                .align(Alignment.End)
-                .fillMaxHeight()){
-                Card(
-                    modifier = Modifier.align(Alignment.Bottom),
-                    colors = CardDefaults.cardColors(containerColor = gray80)
-                ) {
-                    Text(
-                        "${currentPage + 1} / $totalPage",
-                        fontSize = 11.sp,
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                    )
-                }
-            }
-        }
-
-
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     SeoulClutureAppTheme {
-        PageContainer()
+
     }
 }

@@ -1,11 +1,10 @@
 package com.example.seoulclutureapp.ui.screens
 
-import android.content.res.Resources.Theme
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,10 +14,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -28,143 +24,116 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.seoulclutureapp.CardItem
 import com.example.seoulclutureapp.R
 import com.example.seoulclutureapp.model.Event
+import com.example.seoulclutureapp.ui.navigation.NavigationDestination
+import com.example.seoulclutureapp.ui.AppViewModelProvider
+import com.example.seoulclutureapp.ui.EventTopAppBar
 import com.example.seoulclutureapp.ui.theme.SeoulClutureAppTheme
-import com.example.seoulclutureapp.ui.theme.gray80
-import com.example.seoulclutureapp.ui.theme.yellowCard
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 
+object HomeDestination : NavigationDestination {
+    override val route = "home"
+    override val titleRes = R.string.app_name
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
-    eventUiState: EventUiState,
-    todaysEvent:List<Event> = listOf(),
-    retryAction: () -> Unit,
+    navigationToEventDetail: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
+    viewModel: EventViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ){
-    var pagerEvent: List<Event> by remember { mutableStateOf(listOf()) }
-    when (eventUiState) {
-        is EventUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
-        is EventUiState.Success -> {
-            LaunchedEffect(todaysEvent){
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val homeUiState:EventUiState by viewModel.uiState.collectAsState()
 
-                coroutineScope {
-                    launch { pagerEvent = todays10Events(todaysEvent, eventUiState.events) }
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = { EventTopAppBar(scrollBehavior = scrollBehavior,
+            title= stringResource(R.string.app_name),
+            canNavigateBack = false
+            ) }
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            when (homeUiState) {
+                is EventUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
+                is EventUiState.Success -> {
+                    EventsScreen(
+                        events=(homeUiState as EventUiState.Success).todaysEvent,
+                        contentPadding=it,
+                        onEventClicked= { navigationToEventDetail(it) },
+                        modifier=modifier.fillMaxSize())
                 }
+                is EventUiState.Error -> ErrorScreen(viewModel::getEvents,modifier = modifier.fillMaxSize())
             }
-            EventsScreen(pagerEvent, contentPadding, modifier.fillMaxSize())
-
         }
-        is EventUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
     }
+
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-fun todays10Events(todayEvents: List<Event>, totalEvent: List<Event>): List<Event>{
-    val list = ArrayList<Event>()
-    val sdf = SimpleDateFormat("yyyy-MM-dd")
-    val todayDate = sdf.parse(LocalDate.now().toString())
-
-    if(todayEvents.isNotEmpty()){
-            // 오늘이 '시작 날짜'인 행사를 10개 담는다.
-            for(event in todayEvents){
-                val startDate = sdf.parse(event.startDate.substring(0, 10))
-
-                if(todayDate.compareTo(startDate)==0){
-                    list.add(event)
-                    if(list.size==10){
-                        break
-                    }
-                }
-            }
-            if(list.size<10){
-                // 만약 10개가 되지 않았다면, 이전에 담았던 것 외에 오늘을 포함하는 행사를 최대 10개까지 담는다.
-                for(event in todayEvents){
-                    val startDate = sdf.parse(event.startDate.substring(0, 10))
-
-                    if(todayDate.compareTo(startDate)!=0){
-                        list.add(event)
-                        if(list.size==10){
-                            break
-                        }
-                    }
-                }
-            }
-
-
-    }
-    // 오늘의 날짜를 포함하는 행사가 하나도 없다면, 오늘을 포함하지 않는 행사라도 보여준다.
-    // 단, 미래에 열리는 행사일 것.
-    else{
-            if(list.size==0){
-                for(event in totalEvent){
-                    val startDate = sdf.parse(event.startDate.substring(0, 10))
-
-                    if(todayDate < startDate){
-                        list.add(event)
-                        if(list.size==10){
-                            break
-                        }
-                    }
-                }
-            }
-    }
-
-    return list
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun EventsScreen(events: List<Event>, contentPadding: PaddingValues,modifier: Modifier = Modifier){
+fun EventsScreen(events: List<Event>,
+                 contentPadding: PaddingValues,
+                 onEventClicked: (Int) -> Unit,
+                 modifier: Modifier = Modifier){
     if(events.isEmpty()){
         LoadingScreen(Modifier.fillMaxSize())
     }else{
         val scrollState = rememberScrollState()
-        val pagerState = rememberPagerState(0)
+        val pagerState = rememberPagerState(0) { events.size }
+
+
         Column(modifier = modifier
             .padding(contentPadding)
             .verticalScroll(scrollState)) {
-            HorizontalPager(
-                pageCount = events.size, state = pagerState,
+            HorizontalPager(state = pagerState,
                 modifier = modifier
                     .padding(horizontal = 10.dp),
             ) { page ->
                 // Our page content
-                EventCard(events[page], page, events.size)
+                EventCard(event=events[page],
+                    currentPage=page,
+                    totalPage=events.size,
+                    modifier=Modifier.clickable { onEventClicked(page) })
             }
         }
     }
@@ -202,7 +171,9 @@ fun EventCard(event: Event, currentPage:Int, totalPage:Int, modifier:Modifier = 
                         .weight(1f)
                         .align(Alignment.CenterVertically)
                 )
-                Column(modifier = Modifier.weight(2f).padding(start=10.dp,top=2.dp)) {
+                Column(modifier = Modifier
+                    .weight(2f)
+                    .padding(start = 10.dp, top = 2.dp)) {
                     Card(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer)
                     ) {
@@ -210,6 +181,7 @@ fun EventCard(event: Event, currentPage:Int, totalPage:Int, modifier:Modifier = 
                             event.classification,
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.primaryContainer,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(horizontal = 8.dp, vertical = 2.dp)
@@ -265,6 +237,9 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * The home screen displaying error message with re-attempt button.
+ */
 /**
  * The home screen displaying error message with re-attempt button.
  */
