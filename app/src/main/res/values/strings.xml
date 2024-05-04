@@ -2,4 +2,6 @@
     <string name="app_name">SeoulCultureApp</string>
     <string name="retry">retry for the event information</string>
     <string name="loading_failed">loading is failed</string>
+    <string name="event_photo">photo of event\'s information\n</string>
+    <string name="homescreen_title">Seoul Culture Event</string>
 </resources>

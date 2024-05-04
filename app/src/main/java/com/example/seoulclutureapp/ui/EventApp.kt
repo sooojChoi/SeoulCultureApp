@@ -53,7 +53,7 @@ fun EventsTopAppBar(scrollBehavior: TopAppBarScrollBehavior, modifier: Modifier 
         title = {
             Text(
                 text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.displayLarge,
             )
         },
         modifier = modifier
