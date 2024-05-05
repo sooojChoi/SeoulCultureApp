@@ -1,5 +1,6 @@
 package com.example.seoulclutureapp.data
 
+import android.content.Context
 import com.example.seoulclutureapp.network.EventApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
@@ -10,7 +11,7 @@ interface AppContainer {
     val eventRepository: EventRepository
 }
 
-class DefaultAppContainer : AppContainer {
+class DefaultAppContainer(private val context: Context) : AppContainer {
     private val baseUrl = "http://openapi.seoul.go.kr:8088"
 
 
@@ -39,6 +40,7 @@ class DefaultAppContainer : AppContainer {
      * DI implementation for Mars photos repository
      */
     override val eventRepository: EventRepository by lazy {
-        NetworkEventRepository(retrofitService)
+        NetworkEventRepository(retrofitService,
+            EventDatabase.getDatabase(context).eventDao())
     }
 }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
@@ -39,6 +40,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,7 +64,7 @@ import com.example.seoulclutureapp.ui.EventTopAppBar
 import com.example.seoulclutureapp.ui.theme.SeoulClutureAppTheme
 import com.example.seoulclutureapp.ui.theme.errorLight
 import com.example.seoulclutureapp.ui.theme.gray80
-
+import kotlinx.coroutines.launch
 
 
 object EventDetailDestination : NavigationDestination {
@@ -78,11 +80,11 @@ object EventDetailDestination : NavigationDestination {
 fun EventDetailScreen(
       navigateBack: () -> Unit,
       modifier: Modifier = Modifier,
-      viewModel: EventViewModel = viewModel(factory = AppViewModelProvider.Factory)
+      viewModel: EventDetailViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val homeUiState:EventUiState by viewModel.uiState.collectAsState()
-
+    val uiState:EventDetailsUiState by viewModel.uiState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -95,19 +97,15 @@ fun EventDetailScreen(
         },
         modifier = modifier
     ){
-        if(viewModel.eventId!=null){
-            when(homeUiState){
-                is EventUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
-                is EventUiState.Success -> {
-                    val event = (homeUiState as EventUiState.Success).todaysEvent[viewModel.eventId]
-                    EventDetailBody(event=event,
-                        contentPadding = it)
-                }
-                is EventUiState.Error -> {
-                    DetailErrorScreen(it, Modifier.fillMaxSize())
-                }
-            }
-
+        if(viewModel.eventId != null && uiState.todayEvent != null){
+            EventDetailBody(event= uiState.todayEvent!!,
+                contentPadding = it,
+                isLike = uiState.isLike,
+                onLikeClicked = {
+                    coroutineScope.launch {
+                        viewModel.updateEventLike()
+                    }
+                })
         }else{
             DetailErrorScreen(it, Modifier.fillMaxSize())
         }
@@ -116,7 +114,11 @@ fun EventDetailScreen(
 }
 
 @Composable
-fun EventDetailBody(event:Event, contentPadding: PaddingValues = PaddingValues(0.dp), modifier: Modifier = Modifier){
+fun EventDetailBody(event:Event,
+                    contentPadding: PaddingValues = PaddingValues(0.dp),
+                    isLike:Boolean,
+                    onLikeClicked: ()->Unit,
+                    modifier: Modifier = Modifier){
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(event.link))
@@ -211,15 +213,28 @@ fun EventDetailBody(event:Event, contentPadding: PaddingValues = PaddingValues(0
                         )
                     }
                 }
-                IconButton(
-                    onClick = {},
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.FavoriteBorder,
-                        tint = errorLight,
-                        contentDescription = stringResource(R.string.favorite_button)
-                    )
+                if(isLike){
+                    IconButton(
+                        onClick = onLikeClicked,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            tint = errorLight,
+                            contentDescription = stringResource(R.string.favorite_button)
+                        )
+                    }
+                }else{
+                    IconButton(
+                        onClick = onLikeClicked,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.FavoriteBorder,
+                            tint = errorLight,
+                            contentDescription = stringResource(R.string.favorite_button)
+                        )
+                    }
                 }
+
             }
 
         }
@@ -249,6 +264,8 @@ fun EventDetailPreview(){
             "https://culture.seoul.go.kr/cmmn/file/getImage.do?atchFileId=7dd997739af14eb1953d269dc96d2f4a&thumb=Y","2024-01-02",
             "202-01-02","2024-01-02",
             "longitude","latitude","free"),
+            isLike=false,
+            onLikeClicked = {},
             modifier = Modifier.fillMaxSize())
     }
 }

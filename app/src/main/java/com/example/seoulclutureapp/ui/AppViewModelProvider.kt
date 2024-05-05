@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.seoulclutureapp.EventApplication
+import com.example.seoulclutureapp.ui.screens.EventDetailViewModel
 import com.example.seoulclutureapp.ui.screens.EventViewModel
 
 object AppViewModelProvider {
@@ -16,6 +17,12 @@ object AppViewModelProvider {
         // Initializer for ItemEditViewModel
         initializer {
             EventViewModel(
+                this.createSavedStateHandle(),
+                eventApplication().container.eventRepository
+            )
+        }
+        initializer {
+            EventDetailViewModel(
                 this.createSavedStateHandle(),
                 eventApplication().container.eventRepository
             )

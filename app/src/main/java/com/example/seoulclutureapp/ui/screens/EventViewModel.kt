@@ -39,26 +39,20 @@ class EventViewModel(savedStateHandle: SavedStateHandle,
     private var _uiState = MutableStateFlow<EventUiState>(EventUiState.Loading)
     val uiState: StateFlow<EventUiState> = _uiState.asStateFlow()
 
-    val eventId: Int? = savedStateHandle[EventDetailDestination.eventIdArg]
-    /**
-     * Call getMarsPhotos() on init so we can display status immediately.
-     */
     init {
         getEvents()
     }
 
-    /**
-     * Gets Mars photos information from the Mars API Retrofit service and updates the
-     * [MarsPhoto] [List] [MutableList].
-     */
     @RequiresApi(Build.VERSION_CODES.O)
     fun getEvents() {
         viewModelScope.launch {
             _uiState.update {
                 try {
-                    val events = eventRepository.getEvents()
+                    eventRepository.getEvents()
+                    val totalEvents = eventRepository.totalEvents
+                    val todaysEvent = eventRepository.todaysEvents
 
-                    EventUiState.Success(events, todays10Events(events))
+                    EventUiState.Success(totalEvents, todaysEvent)
                 } catch (e: IOException) {
                     Log.e("RetrofitError",e.toString())
                     EventUiState.Error
@@ -73,39 +67,6 @@ class EventViewModel(savedStateHandle: SavedStateHandle,
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun todays10Events(events: List<Event>): List<Event>{
-        val list = ArrayList<Event>()
-        val sdf = SimpleDateFormat("yyyy-MM-dd")
-        val todayDate = sdf.parse(LocalDate.now().toString())
-
-        // 오늘이 '시작 날짜'인 행사를 10개 담는다.
-        for(event in events){
-            val startDate = sdf.parse(event.startDate.substring(0, 10))
-
-            if(todayDate.compareTo(startDate)==0){
-                list.add(event)
-                if(list.size==10){
-                    break
-                }
-            }
-        }
-        if(list.size<10){
-            // 만약 10개가 되지 않았다면, 이전에 담았던 것 외에 오늘을 포함하는 행사를 최대 10개까지 담는다.
-            for(event in events){
-                val startDate = sdf.parse(event.startDate.substring(0, 10))
-
-                if(todayDate.compareTo(startDate)!=0){
-                    list.add(event)
-                    if(list.size==10){
-                        break
-                    }
-                }
-            }
-        }
-
-        return list
-    }
 
     // 특정 날짜가 행사 기간에 포함되는 event 의 리스트를 반환한다.
     fun getEventsByDate(date: Date, events: List<Event>): List<Event>{
@@ -122,16 +83,4 @@ class EventViewModel(savedStateHandle: SavedStateHandle,
         return list
     }
 
-    /**
-     * Factory for [MarsViewModel] that takes [MarsPhotosRepository] as a dependency
-     */
-//    companion object {
-//        val Factory: ViewModelProvider.Factory = viewModelFactory {
-//            initializer {
-//                val application = (this[APPLICATION_KEY] as EventApplication)
-//                val eventRepository = application.container.eventRepository
-//                EventViewModel(eventRepository = eventRepository)
-//            }
-//        }
-//    }
 }
