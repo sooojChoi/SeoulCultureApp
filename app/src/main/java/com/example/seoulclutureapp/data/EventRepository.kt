@@ -58,13 +58,17 @@ class NetworkEventRepository(
 
         // 불러온 데이터를 리스트에 추가한다.
         for(i in totalEventInfo.totalEventInfo.eventList){
-            eventList.add(i)
             // 시작 날짜가 오늘이라면, 오늘의 행사에 추가한다.
             val startDate = sdf.parse(i.startDate.substring(0, 10))
+            val endDate = sdf.parse(i.endDate.substring(0,10))
 
             if(todaysList.size<10 && todayDate.compareTo(startDate)==0){
                 todaysList.add(i)
             }
+            if(todayDate.compareTo(startDate)<=0 || todayDate.compareTo(endDate) <=0 ){
+                eventList.add(i)
+            }
+
         }
 
         // 총 몇 개의 데이터가 존재하는지 확인한다.
@@ -80,13 +84,16 @@ class NetworkEventRepository(
                     }
                     totalEventInfo = eventApiService.getEventResult(API_KEY, startIndex, endIndex)
                     for(i in totalEventInfo.totalEventInfo.eventList){
-                        eventList.add(i)
 
                         // 시작 날짜가 오늘이라면, 오늘의 행사에 추가한다.
                         val startDate = sdf.parse(i.startDate.substring(0, 10))
+                        val endDate = sdf.parse(i.endDate.substring(0,10))
 
                         if(todaysList.size<10 && todayDate.compareTo(startDate)==0){
                             todaysList.add(i)
+                        }
+                        if(todayDate.compareTo(startDate)<=0 || todayDate.compareTo(endDate) <=0 ){
+                            eventList.add(i)
                         }
                     }
                 }

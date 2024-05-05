@@ -1,5 +1,6 @@
 package com.example.seoulclutureapp.ui.screens
 
+import android.graphics.drawable.Icon
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -14,19 +15,19 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,9 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,10 +63,6 @@ import com.example.seoulclutureapp.ui.navigation.NavigationDestination
 import com.example.seoulclutureapp.ui.AppViewModelProvider
 import com.example.seoulclutureapp.ui.EventTopAppBar
 import com.example.seoulclutureapp.ui.theme.SeoulClutureAppTheme
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.time.LocalDate
 
 object HomeDestination : NavigationDestination {
     override val route = "home"
@@ -100,7 +95,8 @@ fun HomeScreen(
                 is EventUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
                 is EventUiState.Success -> {
                     EventsScreen(
-                        events=(homeUiState as EventUiState.Success).todaysEvent,
+                        todaysEvents=(homeUiState as EventUiState.Success).todaysEvent,
+                        totalEvents = (homeUiState as EventUiState.Success).events,
                         contentPadding=it,
                         onEventClicked= { navigationToEventDetail(it) },
                         modifier=modifier.fillMaxSize())
@@ -112,40 +108,143 @@ fun HomeScreen(
 
 }
 
+sealed class Classification(title:String){
+    object Concert: Classification("공연")
+    object Experience: Classification("체험")
+    object Exhibition: Classification("전시")
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun EventsScreen(events: List<Event>,
+fun EventsScreen(todaysEvents: List<Event>,
+                 totalEvents:List<Event>,
                  contentPadding: PaddingValues,
                  onEventClicked: (Int) -> Unit,
                  modifier: Modifier = Modifier){
-    if(events.isEmpty()){
+    var classification:Classification by remember { mutableStateOf(Classification.Concert) }
+
+    if(todaysEvents.isEmpty()){
         LoadingScreen(Modifier.fillMaxSize())
     }else{
         val scrollState = rememberScrollState()
-        val pagerState = rememberPagerState(0) { events.size }
+        val pagerState = rememberPagerState(0) {
+            if(todaysEvents.size < 10){
+                todaysEvents.size
+            }else{
+                10
+            }
+        }
 
 
         Column(modifier = modifier
             .padding(contentPadding)
             .verticalScroll(scrollState)) {
+            Text("오늘의 행사",
+                style = MaterialTheme.typography.displayMedium,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(vertical = 14.dp))
             HorizontalPager(state = pagerState,
                 modifier = modifier
                     .padding(horizontal = 10.dp),
             ) { page ->
                 // Our page content
-                EventCard(event=events[page],
+                EventCardWithPage(event=todaysEvents[page],
                     currentPage=page,
-                    totalPage=events.size,
+                    totalPage=todaysEvents.size,
                     modifier=Modifier.clickable { onEventClicked(page) })
             }
+            Row (modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly){
+                NavigateCard(title = "공연",
+                    isClicked = classification is Classification.Concert,
+                    modifier = Modifier.clickable {
+                    classification = Classification.Concert
+                })
+                NavigateCard(title = "체험",
+                    isClicked = classification is Classification.Experience,
+                    modifier = Modifier.clickable {
+                    classification = Classification.Experience
+                })
+                NavigateCard(title = "전시",
+                    isClicked = classification is Classification.Exhibition,
+                    modifier = Modifier.clickable {
+                    classification = Classification.Exhibition
+                })
+            }
+            
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
+                .height(8000.dp)
+                .padding(horizontal = 15.dp, vertical = 10.dp)){
+                items(totalEvents.filter {
+                    when(classification){
+                        is Classification.Concert -> {
+                            it.classification.contains("뮤지컬")||
+                            it.classification.contains("클래식")||
+                            it.classification.contains("국악")||
+                            it.classification.contains("연극")||
+                            it.classification.contains("무용")||
+                            it.classification.contains("독주")
+                        }
+                        is Classification.Experience -> {
+                            it.classification.contains("체험")||
+                            it.classification.contains("교육")||
+                            it.classification.contains("축제")
+                        }
+                        is Classification.Exhibition -> {
+                            it.classification.contains("전시")||
+                            it.classification.contains("미술")||
+                            it.classification.contains("문화")||
+                            it.classification.contains("영화")
+                        }
+
+                    }
+                }){
+                    EventCardWithNoImg(event = it)
+                }
+            }
+
+
+
         }
     }
 
 }
 
 @Composable
-fun EventCard(event: Event, currentPage:Int, totalPage:Int, modifier:Modifier = Modifier){
+fun NavigateCard(title:String,
+                 isClicked:Boolean,
+                 modifier: Modifier = Modifier){
+    Card(modifier = modifier
+        .padding(horizontal = 10.dp),
+        colors= CardDefaults.cardColors(containerColor = if(isClicked){
+            MaterialTheme.colorScheme.primaryContainer
+        }else{
+            MaterialTheme.colorScheme.primary
+        }
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        ),
+    ){
+        Text(
+            text = title,
+            color = if(isClicked){
+                MaterialTheme.colorScheme.onPrimaryContainer
+            }else{
+                MaterialTheme.colorScheme.background
+            },
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(vertical = 14.dp, horizontal = 30.dp)
+        )
+    }
+}
+
+@Composable
+fun EventCardWithPage(event: Event, currentPage:Int, totalPage:Int, modifier:Modifier = Modifier){
     Card(modifier = modifier
         .fillMaxWidth()
         .padding(10.dp)
@@ -268,7 +367,7 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 fun ScreenPreview(){
     SeoulClutureAppTheme{
-        EventCard(event = Event("클래식","강동구","김성녀의 뮤지컬모노드라마 [벽 속의 요정]",
+        EventCardWithPage(event = Event("클래식","강동구","김성녀의 뮤지컬모노드라마 [벽 속의 요정]",
             "2024-10-31~2024-11-10","강동문화회관","기관1",
             "7세 이상 관람 가능(2017년생부터 관람 가능)","R석 60,000원 / S석 50,000원 / A석 35,000원","링크1",
             "https://culture.seoul.go.kr/cmmn/file/getImage.do?atchFileId=7dd997739af14eb1953d269dc96d2f4a&thumb=Y","2024-01-02",

@@ -9,4 +9,5 @@
     <string name="favorite_button">like button</string>
     <string name="my_event_title">scrap list</string>
     <string name="my_event_empty">There are no events you liked\n</string>
+    <string name="search_event">search event</string>
 </resources>

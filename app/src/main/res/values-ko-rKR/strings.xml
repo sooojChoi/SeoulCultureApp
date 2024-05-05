@@ -10,4 +10,5 @@
     <string name="favorite_button">좋아요 버튼</string>
     <string name="my_event_title">스크랩 목록</string>
     <string name="my_event_empty">좋아요를 누른 행사가 없습니다. </string>
+    <string name="search_event">행사 검색하기</string>
 </resources>

@@ -2,6 +2,7 @@ package com.example.seoulclutureapp.ui.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -23,6 +24,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -110,29 +112,30 @@ fun MyEventsScreen(events: List<Event>,
 }
 @Composable
 fun EventCardWithNoImg(event: Event, modifier:Modifier = Modifier){
-    Card(modifier = modifier
+    OutlinedCard(modifier = modifier
         .fillMaxWidth()
         .padding(horizontal = 10.dp),
-        colors= CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors= CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
+            defaultElevation = 3.dp
         ),
+        border = BorderStroke(1.5.dp, color=MaterialTheme.colorScheme.primary)
     ) {
         Column(
             modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(13.dp)
         ) {
             Row {
                 Column(modifier = Modifier
                     .padding(top = 2.dp)) {
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                     ) {
                         Text(
                             event.classification,
                             fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.primaryContainer,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
@@ -141,15 +144,15 @@ fun EventCardWithNoImg(event: Event, modifier:Modifier = Modifier){
                     }
                     Text(text=event.title, fontSize = 15.sp, fontWeight = FontWeight.Bold,
                         maxLines = 2, overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(top=4.dp))
                     Text("장소: ${event.place}", fontSize=13.sp,
                         maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(top=2.dp))
                     Text("기간: ${event.date}", fontSize=13.sp,
                         maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(top=2.dp))
 
                 }

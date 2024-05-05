@@ -50,8 +50,8 @@ fun EventApp(navController: NavHostController = rememberNavController()) {
     Scaffold(
         bottomBar = {
             BottomNavigation(
-                backgroundColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                backgroundColor = MaterialTheme.colorScheme.background,
+           //     contentColor = MaterialTheme.colorScheme.primary
             ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
@@ -72,7 +72,10 @@ fun EventApp(navController: NavHostController = rememberNavController()) {
                             }
                         },
                         icon = { screen.icon?.let { Icon(it, contentDescription = null) } },
-                        label = { Text(stringResource(screen.titleRes)) },)
+                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                        unselectedContentColor = MaterialTheme.colorScheme.primaryContainer
+                      //  label = { Text(stringResource(screen.titleRes)) },
+                        )
                 }
             }
         }

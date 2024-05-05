@@ -29,11 +29,11 @@ val Typography = Typography(
     displayMedium = TextStyle(
         fontFamily = SongMyung,
         fontWeight = FontWeight.Normal,
-        fontSize = 20.sp
+        fontSize = 26.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = SongMyung,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp
+        fontSize = 22.sp
     ),
 )
