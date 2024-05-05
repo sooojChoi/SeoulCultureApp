@@ -7,4 +7,6 @@
     <string name="event_detail_title">Detail of Event</string>
     <string name="back_button">back button</string>
     <string name="favorite_button">like button</string>
+    <string name="my_event_title">scrap list</string>
+    <string name="my_event_empty">There are no events you liked\n</string>
 </resources>

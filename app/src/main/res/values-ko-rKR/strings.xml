@@ -8,4 +8,6 @@
     <string name="event_detail_title">이벤트 세부 정보</string>
     <string name="back_button">뒤로가기</string>
     <string name="favorite_button">좋아요 버튼</string>
+    <string name="my_event_title">스크랩 목록</string>
+    <string name="my_event_empty">좋아요를 누른 행사가 없습니다. </string>
 </resources>

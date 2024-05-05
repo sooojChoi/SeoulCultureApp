@@ -70,10 +70,17 @@ import kotlinx.coroutines.launch
 object EventDetailDestination : NavigationDestination {
     override val route = "event_detail"
     override val titleRes = R.string.event_detail_title
+    override val icon = null
     const val eventIdArg = "eventId"
     val routeWithArgs = "$route/{$eventIdArg}"
 }
-
+object MyEventDetailDestination : NavigationDestination {
+    override val route = "my_event_detail"
+    override val titleRes = R.string.event_detail_title
+    override val icon = null
+    const val eventIdArg = "eventId"
+    val routeWithArgs = "$route/{$eventIdArg}"
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -101,10 +108,47 @@ fun EventDetailScreen(
             EventDetailBody(event= uiState.todayEvent!!,
                 contentPadding = it,
                 isLike = uiState.isLike,
+                isLikeMode=true,
                 onLikeClicked = {
                     coroutineScope.launch {
                         viewModel.updateEventLike()
                     }
+                })
+        }else{
+            DetailErrorScreen(it, Modifier.fillMaxSize())
+        }
+
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun MyEventDetailScreen(
+    navigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: MyEventDetailViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val uiState:MyEventDetailsUiState by viewModel.uiState.collectAsState()
+
+    Scaffold(
+        topBar = {
+            EventTopAppBar(
+                scrollBehavior=scrollBehavior,
+                title = stringResource(EventDetailDestination.titleRes),
+                canNavigateBack = true,
+                navigateUp = navigateBack,
+            )
+        },
+        modifier = modifier
+    ){
+        if(viewModel.eventId != null && uiState.event != null){
+            EventDetailBody(event= uiState.event!!,
+                contentPadding = it,
+                isLike = false,
+                isLikeMode = false,
+                onLikeClicked = {
+
                 })
         }else{
             DetailErrorScreen(it, Modifier.fillMaxSize())
@@ -117,6 +161,7 @@ fun EventDetailScreen(
 fun EventDetailBody(event:Event,
                     contentPadding: PaddingValues = PaddingValues(0.dp),
                     isLike:Boolean,
+                    isLikeMode:Boolean,
                     onLikeClicked: ()->Unit,
                     modifier: Modifier = Modifier){
     val scrollState = rememberScrollState()
@@ -213,27 +258,30 @@ fun EventDetailBody(event:Event,
                         )
                     }
                 }
-                if(isLike){
-                    IconButton(
-                        onClick = onLikeClicked,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Favorite,
-                            tint = errorLight,
-                            contentDescription = stringResource(R.string.favorite_button)
-                        )
-                    }
-                }else{
-                    IconButton(
-                        onClick = onLikeClicked,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.FavoriteBorder,
-                            tint = errorLight,
-                            contentDescription = stringResource(R.string.favorite_button)
-                        )
+                if(isLikeMode){
+                    if(isLike){
+                        IconButton(
+                            onClick = onLikeClicked,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Favorite,
+                                tint = errorLight,
+                                contentDescription = stringResource(R.string.favorite_button)
+                            )
+                        }
+                    }else{
+                        IconButton(
+                            onClick = onLikeClicked,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.FavoriteBorder,
+                                tint = errorLight,
+                                contentDescription = stringResource(R.string.favorite_button)
+                            )
+                        }
                     }
                 }
+
 
             }
 
@@ -265,6 +313,7 @@ fun EventDetailPreview(){
             "202-01-02","2024-01-02",
             "longitude","latitude","free"),
             isLike=false,
+            isLikeMode = true,
             onLikeClicked = {},
             modifier = Modifier.fillMaxSize())
     }

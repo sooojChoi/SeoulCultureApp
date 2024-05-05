@@ -54,31 +54,30 @@ class EventDetailViewModel(
     private val eventRepository: EventRepository
 ): ViewModel() {
     val eventId: Int? = savedStateHandle[EventDetailDestination.eventIdArg]
-    val event = eventRepository.todaysEvents[eventId ?: 0]
+    val todayEvent = eventRepository.todaysEvents[eventId ?: 0]
 
    // private var _uiState = MutableStateFlow<EventDetailsUiState>(EventDetailsUiState(null))
     val uiState: StateFlow<EventDetailsUiState>
     = eventRepository.getAllLikeEvent().filterNotNull().map {
        var isLike = false
        for(e in it){
-           if(e.title == event.title && e.date == event.date){
+           if(e.title == todayEvent.title && e.date == todayEvent.date){
                isLike = true
                break
            }
        }
-       EventDetailsUiState(todayEvent = event,
+       EventDetailsUiState(todayEvent = todayEvent,
            isLike = isLike)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-        initialValue = EventDetailsUiState(event, false)
+        initialValue = EventDetailsUiState(todayEvent, false)
     )
 
 
     suspend fun updateEventLike(){
         if(uiState.value.isLike){
             eventRepository.deleteLikeEvent(uiState.value.todayEvent!!.toLikeEvent())
-
         }
         else{
             eventRepository.insertLikeEvent(uiState.value.todayEvent!!.toLikeEvent())

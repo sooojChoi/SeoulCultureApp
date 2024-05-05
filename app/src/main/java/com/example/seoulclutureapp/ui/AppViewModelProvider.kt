@@ -10,6 +10,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.seoulclutureapp.EventApplication
 import com.example.seoulclutureapp.ui.screens.EventDetailViewModel
 import com.example.seoulclutureapp.ui.screens.EventViewModel
+import com.example.seoulclutureapp.ui.screens.MyEventDetailViewModel
+import com.example.seoulclutureapp.ui.screens.MyEventViewModel
 
 object AppViewModelProvider {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -23,6 +25,18 @@ object AppViewModelProvider {
         }
         initializer {
             EventDetailViewModel(
+                this.createSavedStateHandle(),
+                eventApplication().container.eventRepository
+            )
+        }
+        initializer {
+            MyEventViewModel(
+                this.createSavedStateHandle(),
+                eventApplication().container.eventRepository
+            )
+        }
+        initializer {
+            MyEventDetailViewModel(
                 this.createSavedStateHandle(),
                 eventApplication().container.eventRepository
             )

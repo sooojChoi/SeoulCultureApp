@@ -1,5 +1,7 @@
 package com.example.seoulclutureapp.ui.navigation
 
+import androidx.compose.ui.graphics.vector.ImageVector
+
 interface NavigationDestination {
     /**
      * Unique name to define the path for a composable
@@ -10,4 +12,5 @@ interface NavigationDestination {
      * String resource id to that contains title to be displayed for the screen.
      */
     val titleRes: Int
+    val icon:ImageVector?
 }
