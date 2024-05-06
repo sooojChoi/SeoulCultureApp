@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -51,7 +52,7 @@ fun EventApp(navController: NavHostController = rememberNavController()) {
         bottomBar = {
             BottomNavigation(
                 backgroundColor = MaterialTheme.colorScheme.background,
-           //     contentColor = MaterialTheme.colorScheme.primary
+                contentColor = MaterialTheme.colorScheme.primaryContainer
             ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
@@ -72,9 +73,10 @@ fun EventApp(navController: NavHostController = rememberNavController()) {
                             }
                         },
                         icon = { screen.icon?.let { Icon(it, contentDescription = null) } },
-                        selectedContentColor = MaterialTheme.colorScheme.primary,
-                        unselectedContentColor = MaterialTheme.colorScheme.primaryContainer
-                      //  label = { Text(stringResource(screen.titleRes)) },
+                        selectedContentColor = MaterialTheme.colorScheme.primaryContainer,
+                        unselectedContentColor = MaterialTheme.colorScheme.primary,
+                        label = { Text(stringResource(screen.titleRes),
+                            fontSize = 12.sp) },
                         )
                 }
             }

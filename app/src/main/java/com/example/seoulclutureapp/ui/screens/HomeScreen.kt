@@ -138,7 +138,8 @@ fun EventsScreen(todaysEvents: List<Event>,
 
         Column(modifier = modifier
             .padding(contentPadding)
-            .verticalScroll(scrollState)) {
+            .verticalScroll(scrollState)
+        ) {
             Text("오늘의 행사",
                 style = MaterialTheme.typography.displayMedium,
                 modifier = Modifier
@@ -177,7 +178,7 @@ fun EventsScreen(todaysEvents: List<Event>,
             
             LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier
-                .height(8000.dp)
+                .height(800.dp)
                 .padding(horizontal = 15.dp, vertical = 10.dp)){
                 items(totalEvents.filter {
                     when(classification){

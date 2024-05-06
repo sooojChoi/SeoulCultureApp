@@ -112,14 +112,14 @@ fun MyEventsScreen(events: List<Event>,
 }
 @Composable
 fun EventCardWithNoImg(event: Event, modifier:Modifier = Modifier){
-    OutlinedCard(modifier = modifier
+    Card(modifier = modifier
         .fillMaxWidth()
         .padding(horizontal = 10.dp),
         colors= CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 3.dp
         ),
-        border = BorderStroke(1.5.dp, color=MaterialTheme.colorScheme.primary)
+       // border = BorderStroke(1.dp, color=MaterialTheme.colorScheme.primaryContainer)
     ) {
         Column(
             modifier
